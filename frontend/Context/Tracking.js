@@ -1,216 +1,159 @@
-import React, { useState, useEffect } from "react";
-import web3Modal from "web3modal";
-import { ethers } from "ethers";
+import React, { useState, useEffect, createContext } from 'react';
+import { createConfig, WagmiConfig, useAccount, useConnect, useDisconnect, useContractWrite, useContractRead } from 'wagmi';
+import { sepolia } from 'wagmi/chains';
+import { injected } from 'wagmi/connectors';
+import { http, parseEther } from 'viem';
+import tracking from '../Context/Tracking.json';
 
-import tracking from "../Context/Tracking.json";
-const ContractAddress = "//contract address";
+const ContractAddress = process.env.YOUR_SEPOLIA_CONTRACT_ADDRESS;
 const ContractABI = tracking.abi;
 
-// Fetching Smart Contract
-const fetchContract = (signerOrProvider) =>
-  new ethers.Contract(ContractAddress, ContractABI, signerOrProvider);
+// Configure Wagmi
+const config = createConfig({
+  autoConnect: true,
+  chains: [sepolia],
+  transports: {
+    [sepolia.id]: http(process.env.YOUR_SEPOLIA_RPC_URL),
+  },
+  connectors: [injected()],
+});
 
-export const TrackingContext = React.createContext();
+export const TrackingContext = createContext();
 
 export const TrackingProvider = ({ children }) => {
   const DappName = "Tracking Dapp";
-  const [currentUser, setCurrentUser] = useState("");
+  const { address, isConnected } = useAccount();
+  const { connect } = useConnect();
+  const { disconnect } = useDisconnect();
+  const [currentUser, setCurrentUser] = useState('');
 
-  const createShipment = async (items) => {
-    console.log(items);
-    const { receiver, pickupTime, distance, price } = items;
-
-    try {
-      const web3Modal = new web3Modal();
-      const connection = await web3Modal.connect();
-      const provider = new ethers.providers.Web3Provider(connection);
-      const signer = provider.getSigner();
-      const contract = fetchContract(signer);
-      const createItem = await contract.createShipment(
-        receiver,
-        new Date(pickupTime).getTime(),
-        distance,
-        ethers.utils.parseUnits(price, 18),
-        {
-          value: ethers.utils.parseUnits(price, 18),
-        }
-      );
-      await createItem.wait();
-      console.log(createItem);
-    } catch (error) {
-      console.log("Something want wrong", error);
-    }
-  };
-
-  const getAllShipments = async () => {
-    try {
-      const provider = new ethers.providers.JsonRpcProvider();
-      const contract = fetchContract(provider);
-      const shipments = await contract.getAllShipments();
-      const allShipments = shipments.map((shipment) => ({
-        sender: shipment.sender,
-        receiver: shipment.receiver,
-        price: ethers.utils.formatEther(shipments.price.toString()),
-        pickupTime: shipment.pickupTime.toNumber(),
-        deliveryTime: shipment.deliveryTime.toNumber(),
-        distance: shipment.distance.toNumber(),
-        isPaid: shipment.isPaid,
-        status: shipment.status,
-      }));
-      return allShipments;
-    } catch (error) {
-      console.log("Something want wrong", error);
-    }
-  };
-
-  const getShipmentsCount = async () => {
-    try {
-      if (!window.ethereum) {
-        return "Install Metamask";
-        const accounts = await window.ethereum.request({
-          method: "eth_requestAccounts",
-        });
-      }
-      const provider = new ethers.providers.JsonRpcProvider();
-      const contract = fetchContract(provider);
-      const shipmentsCount = await contract.getShipmentsCount(accounts[0]);
-      return shipmentsCount.toNumber();
-    } catch (error) {
-      console.log("error want, getting Shipment");
-    }
-  };
-
-  const CompleteShipment = async (CompleteShip) => {
-    console.log(CompleteShip);
-
-    const { receiver, index } = CompleteShip;
-    try {
-      if (!window.ethereum) return "Install Metamask";
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      const web3Modal = new web3Modal();
-      const connection = await web3Modal.connect();
-      const provider = new ethers.providers.Web3Provider(connection);
-      const signer = provider.getSigner();
-      const contract = fetchContract(signer);
-      const transaction = await contract.completeShipment(
-        accounts[0],
-        receiver,
-        index,
-        {
-          gaslimit: 300000,
-        }
-      );
-      transaction.wait();
-      console.log(transaction);
-    } catch (error) {
-      console.log("Wrong Complete Shipment", error);
-    }
-  };
-
-  const getShipment = async (index) => {
-    console.log(index * 1);
-    try {
-      if (!window.ethereum) return "Install Metamask";
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-
-      const provider = new ethers.providers.JsonRpcProvider();
-      const contract = fetchContract(provider);
-      const shipment = await contract.getShipment(accounts[0], index * 1);
-
-      const SingleShipment = {
-        sender: shipment[0],
-        receiver: shipment[1],
-        pickupTime: shipment[2].toNumber(),
-        deliveryTime: shipment[3].toNumber(),
-        distance: shipment[4].toNumber(),
-        price: ethers.utils.formatEther(shipment[5].toString()),
-        isPaid: shipment[6],
-        status: shipment[7],
-      };
-
-      return SingleShipment;
-    } catch (error) {
-      console.log("Sorry No Shipment Found", error);
-    }
-  };
-
-  const startShipment = async (getProduct) => {
-    const { receiver, index } = getProduct;
-    try {
-      if (!window.ethereum) return "Install Metamask";
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-
-      const web3Modal = new web3Modal();
-      const connection = await web3Modal.connect();
-      const provider = new ethers.providers.Web3Provider(connection);
-      const signer = provider.getSigner();
-      const contract = fetchContract(signer);
-      const shipment = await contract.startShipment(
-        accounts[0],
-        receiver,
-        index * 1
-      );
-      shipment.wait();
-      console.log(shipment);
-    } catch (error) {
-      console.log("Sorry No shipment", error);
-    }
-  };
-
-  // check wallet connected or not
-  const checkIfwalletConnected = async () => {
-    try {
-      if (!window.ethereum) return "Install Metamask";
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      if (accounts.length) {
-        setCurrentUser(accounts[0]);
-      } else {
-        return "No account";
-      }
-    } catch (error) {
-      return "Not Connected";
-    }
-  };
-
+  // Wallet connection handler
   const walletConnect = async () => {
     try {
-      if (!window.ethereum) return "Install Metamask";
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      setCurrentUser(accounts[0]);
+      if (!isConnected) {
+        connect({ connector: injected() });
+      }
     } catch (error) {
-      return "Something want wrong";
+      console.error('Connection failed:', error);
     }
   };
 
+  // Update current user when connection changes
   useEffect(() => {
-    checkIfwalletConnected();
-  }, []);
+    setCurrentUser(isConnected ? address : '');
+  }, [isConnected, address]);
+
+  // Create Shipment
+  const { writeAsync: createShipment } = useContractWrite({
+    address: ContractAddress,
+    abi: ContractABI,
+    functionName: 'createShipment',
+  });
+
+  // Get All Shipments
+  const { data: allShipments, refetch: refetchShipments } = useContractRead({
+    address: ContractAddress,
+    abi: ContractABI,
+    functionName: 'getAllShipments',
+  });
+
+  // Get Shipment Count
+  const { data: shipmentsCount } = useContractRead({
+    address: ContractAddress,
+    abi: ContractABI,
+    functionName: 'getShipmentsCount',
+    args: [currentUser],
+    enabled: !!currentUser,
+  });
+
+  // Complete Shipment
+  const { writeAsync: completeShipment } = useContractWrite({
+    address: ContractAddress,
+    abi: ContractABI,
+    functionName: 'completeShipment',
+  });
+
+  // Start Shipment
+  const { writeAsync: startShipment } = useContractWrite({
+    address: ContractAddress,
+    abi: ContractABI,
+    functionName: 'startShipment',
+  });
+
+  // Get Single Shipment
+  const getShipment = async (index) => {
+    try {
+      const { data } = await useContractRead({
+        address: ContractAddress,
+        abi: ContractABI,
+        functionName: 'getShipment',
+        args: [currentUser, index],
+        enabled: !!currentUser,
+      });
+
+      return {
+        sender: data[0],
+        receiver: data[1],
+        pickupTime: Number(data[2]),
+        deliveryTime: Number(data[3]),
+        distance: Number(data[4]),
+        price: parseEther(data[5].toString()),
+        isPaid: data[6],
+        status: data[7],
+      };
+    } catch (error) {
+      console.error("Error fetching shipment:", error);
+      return null;
+    }
+  };
+
+  // Format shipments data
+  const formattedShipments = allShipments?.map(shipment => ({
+    sender: shipment[0],
+    receiver: shipment[1],
+    pickupTime: Number(shipment[2]),
+    deliveryTime: Number(shipment[3]),
+    distance: Number(shipment[4]),
+    price: parseEther(shipment[5].toString()),
+    isPaid: shipment[6],
+    status: shipment[7],
+  })) || [];
 
   return (
-    <TrackingContext.Provider
-      value={{
-        DappName,
-        currentUser,
-        createShipment,
-        getAllShipments,
-        getShipmentsCount,
-        CompleteShipment,
-        getShipment,
-        startShipment,
-        walletConnect,
-      }}
-    >
-      {children}
-    </TrackingContext.Provider>
+    <WagmiConfig config={config}>
+      <TrackingContext.Provider
+        value={{
+          DappName,
+          currentUser,
+          walletConnect,
+          disconnect,
+          isConnected,
+          createShipment: async (items) => {
+            const { receiver, pickupTime, distance, price } = items;
+            return createShipment({
+              args: [
+                receiver,
+                Math.floor(new Date(pickupTime).getTime() / 1000), // UNIX timestamp
+                distance,
+                parseEther(price.toString()),
+              ],
+              value: parseEther(price.toString()),
+            });
+          },
+          getAllShipments: () => formattedShipments,
+          getShipmentsCount: () => shipmentsCount ? Number(shipmentsCount) : 0,
+          CompleteShipment: (completeData) => completeShipment({
+            args: [completeData.receiver, completeData.index]
+          }),
+          startShipment: (startData) => startShipment({
+            args: [startData.receiver, startData.index]
+          }),
+          getShipment,
+          refetchShipments,
+        }}
+      >
+        {children}
+      </TrackingContext.Provider>
+    </WagmiConfig>
   );
 };
