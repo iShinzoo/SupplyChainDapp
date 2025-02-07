@@ -1,19 +1,19 @@
-import React, { useState, useEffect, createContext } from 'react';
-import { createConfig, WagmiConfig, useAccount, useConnect, useDisconnect, useContractWrite, useContractRead } from 'wagmi';
+import React, { useState, useEffect, createContext, useCallback } from 'react';
+import { WagmiConfig, useAccount, useConnect, useDisconnect, useContractWrite, useContractRead } from 'wagmi';
+import { createConfig, http } from 'wagmi';
 import { sepolia } from 'wagmi/chains';
 import { injected } from 'wagmi/connectors';
-import { http, parseEther } from 'viem';
+import { parseEther } from 'viem';
 import tracking from '../Context/Tracking.json';
 
-const ContractAddress = process.env.YOUR_SEPOLIA_CONTRACT_ADDRESS;
+const ContractAddress = process.env.NEXT_PUBLIC_SEPOLIA_CONTRACT_ADDRESS;
 const ContractABI = tracking.abi;
 
-// Configure Wagmi
-const config = createConfig({
+export const config = createConfig({
   autoConnect: true,
   chains: [sepolia],
   transports: {
-    [sepolia.id]: http(process.env.YOUR_SEPOLIA_RPC_URL),
+    [sepolia.id]: http(process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL),
   },
   connectors: [injected()],
 });
@@ -66,20 +66,6 @@ export const TrackingProvider = ({ children }) => {
     enabled: !!currentUser,
   });
 
-  // Complete Shipment
-  const { writeAsync: completeShipment } = useContractWrite({
-    address: ContractAddress,
-    abi: ContractABI,
-    functionName: 'completeShipment',
-  });
-
-  // Start Shipment
-  const { writeAsync: startShipment } = useContractWrite({
-    address: ContractAddress,
-    abi: ContractABI,
-    functionName: 'startShipment',
-  });
-
   // Get Single Shipment
   const getShipment = async (index) => {
     try {
@@ -119,6 +105,26 @@ export const TrackingProvider = ({ children }) => {
     status: shipment[7],
   })) || [];
 
+  // Complete Shipment
+  const { writeAsync: completeShipment } = useContractWrite({
+    address: ContractAddress,
+    abi: ContractABI,
+    functionName: "completeShipment", 
+  });
+
+  const { writeAsync: startShipment } = useContractWrite({
+    address: ContractAddress,
+    abi: ContractABI,
+    functionName: "startShipment",
+  });
+
+  // Debugging logs
+  useEffect(() => {
+    console.log("Complete Shipment Function:", completeShipment);
+    console.log("Start Shipment Function:", startShipment);
+  }, [completeShipment, startShipment]);
+
+
   return (
     <WagmiConfig config={config}>
       <TrackingContext.Provider
@@ -128,28 +134,24 @@ export const TrackingProvider = ({ children }) => {
           walletConnect,
           disconnect,
           isConnected,
-          createShipment: async (items) => {
-            const { receiver, pickupTime, distance, price } = items;
-            return createShipment({
-              args: [
-                receiver,
-                Math.floor(new Date(pickupTime).getTime() / 1000), // UNIX timestamp
-                distance,
-                parseEther(price.toString()),
-              ],
-              value: parseEther(price.toString()),
-            });
+          completeShipmentHandler: async (completeData) => {
+            try {
+              await completeShipment({
+                args: [completeData.receiver, completeData.index],
+              });
+            } catch (error) {
+              console.error("Shipment completion failed:", error);
+            }
           },
-          getAllShipments: () => formattedShipments,
-          getShipmentsCount: () => shipmentsCount ? Number(shipmentsCount) : 0,
-          CompleteShipment: (completeData) => completeShipment({
-            args: [completeData.receiver, completeData.index]
-          }),
-          startShipment: (startData) => startShipment({
-            args: [startData.receiver, startData.index]
-          }),
-          getShipment,
-          refetchShipments,
+          startShipmentHandler: async (startData) => {
+            try {
+              await startShipment({
+                args: [startData.receiver, startData.index],
+              });
+            } catch (error) {
+              console.error("Starting shipment failed:", error);
+            }
+          },
         }}
       >
         {children}
