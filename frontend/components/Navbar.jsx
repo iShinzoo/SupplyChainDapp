@@ -7,7 +7,9 @@ export default function Navbar() {
         <Link href="/" className="text-white text-xl font-bold">Shipment Tracker</Link>
         <div className="space-x-4">
           <Link href="/create" className="text-gray-300 hover:text-white">Create Shipment</Link>
-          <Link href="/shipmentsID" className="text-gray-300 hover:text-white">All Shipments</Link>
+          <Link href="/all-shipments" className="text-gray-300 hover:text-white">
+  All Shipments
+</Link>
         </div>
       </div>
     </nav>
