@@ -47,7 +47,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!isConnected) {
-      router.push('/landing');
+      router.push('/');
     }
   }, [isConnected, router]);
 
