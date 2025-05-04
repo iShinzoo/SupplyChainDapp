@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ethers } from 'ethers';
-import abi from '../utils/Tracking.json';
+import abi from '../utils/ShipmentPart.json';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
@@ -9,7 +9,7 @@ import { Truck, Package, CreditCard } from 'lucide-react';
 export default function CreateShipment() {
   const [form, setForm] = useState({ receiver: '', distance: '', price: '' });
   const router = useRouter();
-  const CONTRACT_ADDRESS = "0x4EC17E231FEC4e133c3f58Ac94B549dD40Db0599";
+  const CONTRACT_ADDRESS = "0xCdd43724cb2502e8A704C488a00DFe2A92d5606A";
   const CONTRACT_ABI = abi.abi;
 
   const handleSubmit = async (e) => {

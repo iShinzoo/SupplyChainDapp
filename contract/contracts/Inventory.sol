@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
+// Inventory deployed to: 0x9c0c101d811379Dd8d66D4E88531a218Fb13FCEC
+
 contract Inventory {
     struct Product {
         string name;
