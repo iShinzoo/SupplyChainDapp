@@ -22,9 +22,7 @@ export default function CreateShipmentPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [receiverAddress, setReceiverAddress] = useState("")
   const [selectedItems, setSelectedItems] = useState<{ productId: number; quantity: number }[]>([])
-  \
-  const [isSubmitting, setIsSubmitting(false
-  )
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const router = useRouter()
   const { toast } = useToast()
