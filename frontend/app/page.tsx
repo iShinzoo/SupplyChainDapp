@@ -7,6 +7,7 @@ import { motion } from "framer-motion"
 import { useToast } from "@/hooks/use-toast"
 import { Package2, Truck, BarChart3, ArrowRight, Wallet, ChevronDown } from "lucide-react"
 import Image from "next/image"
+import { ConnectButton } from "@rainbow-me/rainbowkit"
 
 export default function LandingPage() {
   const [account, setAccount] = useState<string | null>(null)
@@ -104,21 +105,7 @@ export default function LandingPage() {
               <Package2 className="h-8 w-8 mr-2" />
               <span className="font-bold text-xl">BlockChain Supply Chain</span>
             </div>
-            {account ? (
-              <Button
-                variant="outline"
-                className="border-white text-white hover:bg-white hover:text-black"
-                onClick={() => router.push("/dashboard")}
-              >
-                <Wallet className="mr-2 h-4 w-4" />
-                {`${account.substring(0, 6)}...${account.substring(38)}`}
-              </Button>
-            ) : (
-              <Button onClick={connectWallet} disabled={isConnecting} className="bg-white text-black hover:bg-gray-200">
-                <Wallet className="mr-2 h-4 w-4" />
-                {isConnecting ? "Connecting..." : "Connect Wallet"}
-              </Button>
-            )}
+            <ConnectButton showBalance={false} accountStatus="address" />
           </div>
         </div>
 
@@ -136,26 +123,7 @@ export default function LandingPage() {
             Transparent, secure, and efficient inventory and shipment tracking on the blockchain.
           </motion.p>
           <motion.div variants={itemVariants}>
-            {account ? (
-              <Button
-                onClick={() => router.push("/dashboard")}
-                size="lg"
-                className="bg-white text-black hover:bg-gray-200"
-              >
-                Go to Dashboard
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            ) : (
-              <Button
-                onClick={connectWallet}
-                size="lg"
-                className="bg-white text-black hover:bg-gray-200"
-                disabled={isConnecting}
-              >
-                {isConnecting ? "Connecting..." : "Connect Wallet to Start"}
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            )}
+            <ConnectButton showBalance={false} chainStatus="icon" />
           </motion.div>
         </motion.div>
 
