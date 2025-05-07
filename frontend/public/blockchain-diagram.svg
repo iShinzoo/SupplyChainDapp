@@ -1,0 +1,33 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="800" height="600" fill="#111111"/>
+<g opacity="0.8">
+<rect x="100" y="100" width="150" height="100" rx="10" fill="#333333" stroke="white" stroke-width="2"/>
+<text x="175" y="150" text-anchor="middle" fill="white" font-family="Arial" font-size="16">Inventory</text>
+<rect x="325" y="100" width="150" height="100" rx="10" fill="#333333" stroke="white" stroke-width="2"/>
+<text x="400" y="150" text-anchor="middle" fill="white" font-family="Arial" font-size="16">Blockchain</text>
+<rect x="550" y="100" width="150" height="100" rx="10" fill="#333333" stroke="white" stroke-width="2"/>
+<text x="625" y="150" text-anchor="middle" fill="white" font-family="Arial" font-size="16">Shipment</text>
+<rect x="100" y="300" width="150" height="100" rx="10" fill="#333333" stroke="white" stroke-width="2"/>
+<text x="175" y="350" text-anchor="middle" fill="white" font-family="Arial" font-size="16">Sender</text>
+<rect x="325" y="300" width="150" height="100" rx="10" fill="#333333" stroke="white" stroke-width="2"/>
+<text x="400" y="350" text-anchor="middle" fill="white" font-family="Arial" font-size="16">Smart Contract</text>
+<rect x="550" y="300" width="150" height="100" rx="10" fill="#333333" stroke="white" stroke-width="2"/>
+<text x="625" y="350" text-anchor="middle" fill="white" font-family="Arial" font-size="16">Receiver</text>
+<path d="M175 200L175 300" stroke="white" stroke-width="2" stroke-dasharray="5 5"/>
+<path d="M400 200L400 300" stroke="white" stroke-width="2"/>
+<path d="M625 200L625 300" stroke="white" stroke-width="2" stroke-dasharray="5 5"/>
+<path d="M250 150L325 150" stroke="white" stroke-width="2"/>
+<path d="M475 150L550 150" stroke="white" stroke-width="2"/>
+<path d="M250 350L325 350" stroke="white" stroke-width="2"/>
+<path d="M475 350L550 350" stroke="white" stroke-width="2"/>
+<circle cx="175" cy="150" r="5" fill="white"/>
+<circle cx="400" cy="150" r="5" fill="white"/>
+<circle cx="625" cy="150" r="5" fill="white"/>
+<circle cx="175" cy="350" r="5" fill="white"/>
+<circle cx="400" cy="350" r="5" fill="white"/>
+<circle cx="625" cy="350" r="5" fill="white"/>
+<rect x="325" y="450" width="150" height="50" rx="10" fill="#333333" stroke="white" stroke-width="2"/>
+<text x="400" y="480" text-anchor="middle" fill="white" font-family="Arial" font-size="16">Analytics</text>
+<path d="M400 400L400 450" stroke="white" stroke-width="2"/>
+</g>
+</svg>
